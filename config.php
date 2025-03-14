@@ -3,7 +3,7 @@
  * 配置文件
  */
 return array (
-  'loginPasswordHash' => '$2y$12$c4jG2iKoXabk6xsmSbk9X.4y2BqCFk2tU2Wpb7jVxlKx9qPmMfVXK',
+  'loginPasswordHash' => '$2y$12$Vzm/H.ST822leMLBF7qMi.wHfu/yQHRp75jSEKW8U4OwkpJhmXjiy',
   'jsonFilesDir' => 'json_files/',
   'historyDir' => 'history/',
   'replacementsFile' => 'replacements.json',
