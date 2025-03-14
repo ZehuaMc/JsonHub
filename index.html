@@ -1,0 +1,4216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON 配置管理平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <!-- CodeMirror CSS and JS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/eclipse.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/fold/foldgutter.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/hint/show-hint.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/lint/lint.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/fold/foldcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/fold/foldgutter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/fold/brace-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/hint/javascript-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/lint/lint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/addon/lint/json-lint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonlint/1.6.0/jsonlint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  
+  <style>
+    :root {
+      /* Light Theme Variables */
+      --primary: #0070f3;
+      --primary-hover: #0050c0;
+      --primary-light: #e6f7ff;
+      --secondary: #7928ca;
+      --secondary-hover: #6010b0;
+      --accent: #ff4081;
+      --accent-hover: #e6004d;
+      --success: #52c41a;
+      --success-hover: #389e0d;
+      --warning: #faad14;
+      --warning-hover: #d48806;
+      --error: #ff4d4f;
+      --error-hover: #cf1322;
+      --info: #1890ff;
+      --info-hover: #096dd9;
+      
+      --background: #f6f8fa;
+      --foreground: #111;
+      --card: #fff;
+      --card-hover: #f9fafb;
+      --border: #eaeaea;
+      --border-hover: #ddd;
+      --muted: #737373;
+      
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+      
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      --animation-duration: 0.3s;
+    }
+    
+    .dark-mode {
+      /* Dark Theme Variables */
+      --primary: #0070f3;
+      --primary-hover: #0050c0;
+      --primary-light: #003166;
+      --secondary: #7928ca;
+      --secondary-hover: #6010b0;
+      --accent: #ff4081;
+      --accent-hover: #e6004d;
+      --success: #52c41a;
+      --success-hover: #389e0d;
+      --warning: #faad14;
+      --warning-hover: #d48806;
+      --error: #ff4d4f;
+      --error-hover: #cf1322;
+      --info: #1890ff;
+      --info-hover: #096dd9;
+      
+      --background: #121212;
+      --foreground: #f0f0f0;
+      --card: #1e1e1e;
+      --card-hover: #252525;
+      --border: #333;
+      --border-hover: #444;
+      --muted: #888;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: var(--font-sans);
+      background-color: var(--background);
+      color: var(--foreground);
+      line-height: 1.5;
+      font-size: 16px;
+    }
+    
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color var(--animation-duration);
+    }
+    
+    a:hover {
+      color: var(--primary-hover);
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+    }
+    
+    button, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: all var(--animation-duration);
+      border: none;
+      outline: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--secondary-hover);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent);
+      color: white;
+    }
+    
+    .btn-accent:hover {
+      background-color: var(--accent-hover);
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: var(--success-hover);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background-color: var(--warning-hover);
+    }
+    
+    .btn-error {
+      background-color: var(--error);
+      color: white;
+    }
+    
+    .btn-error:hover {
+      background-color: var(--error-hover);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--foreground);
+    }
+    
+    .btn-outline:hover {
+      border-color: var(--border-hover);
+      background-color: var(--card-hover);
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .btn-lg {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+    
+    .btn-icon {
+      padding: 0.5rem;
+    }
+    
+    .btn-icon i {
+      margin: 0;
+    }
+    
+    .btn i {
+      margin-right: 0.5rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background-color: var(--card);
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      transition: border-color var(--animation-duration);
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .card {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: box-shadow var(--animation-duration), transform var(--animation-duration);
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .card-title {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    
+    .card-body {
+      margin-bottom: 1rem;
+    }
+    
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .badge-primary {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+    
+    .badge-secondary {
+      background-color: rgba(121, 40, 202, 0.1);
+      color: var(--secondary);
+    }
+    
+    .badge-accent {
+      background-color: rgba(255, 64, 129, 0.1);
+      color: var(--accent);
+    }
+    
+    .badge-success {
+      background-color: rgba(82, 196, 26, 0.1);
+      color: var(--success);
+    }
+    
+    .badge-warning {
+      background-color: rgba(250, 173, 20, 0.1);
+      color: var(--warning);
+    }
+    
+    .badge-error {
+      background-color: rgba(255, 77, 79, 0.1);
+      color: var(--error);
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+      background-color: rgba(24, 144, 255, 0.1);
+      color: var(--info);
+    }
+    
+    .alert-success {
+      background-color: rgba(82, 196, 26, 0.1);
+      color: var(--success);
+    }
+    
+    .alert-warning {
+      background-color: rgba(250, 173, 20, 0.1);
+      color: var(--warning);
+    }
+    
+    .alert-error {
+      background-color: rgba(255, 77, 79, 0.1);
+      color: var(--error);
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .flex-col {
+      flex-direction: column;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-center {
+      justify-content: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .gap-1 {
+      gap: 0.25rem;
+    }
+    
+    .gap-2 {
+      gap: 0.5rem;
+    }
+    
+    .gap-3 {
+      gap: 0.75rem;
+    }
+    
+    .gap-4 {
+      gap: 1rem;
+    }
+    
+    .w-full {
+      width: 100%;
+    }
+    
+    .h-full {
+      height: 100%;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .text-sm {
+      font-size: 0.875rem;
+    }
+    
+    .text-lg {
+      font-size: 1.125rem;
+    }
+    
+    .text-xl {
+      font-size: 1.25rem;
+    }
+    
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+    
+    .font-bold {
+      font-weight: 700;
+    }
+    
+    .font-medium {
+      font-weight: 500;
+    }
+    
+    .text-muted {
+      color: var(--muted);
+    }
+    
+    .text-primary {
+      color: var(--primary);
+    }
+    
+    .text-secondary {
+      color: var(--secondary);
+    }
+    
+    .text-accent {
+      color: var(--accent);
+    }
+    
+    .text-success {
+      color: var(--success);
+    }
+    
+    .text-warning {
+      color: var(--warning);
+    }
+    
+    .text-error {
+      color: var(--error);
+    }
+    
+    .mt-1 {
+      margin-top: 0.25rem;
+    }
+    
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+    
+    .mt-3 {
+      margin-top: 0.75rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .mb-1 {
+      margin-bottom: 0.25rem;
+    }
+    
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+    
+    .mb-3 {
+      margin-bottom: 0.75rem;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .ml-1 {
+      margin-left: 0.25rem;
+    }
+    
+    .ml-2 {
+      margin-left: 0.5rem;
+    }
+    
+    .ml-3 {
+      margin-left: 0.75rem;
+    }
+    
+    .ml-4 {
+      margin-left: 1rem;
+    }
+    
+    .mr-1 {
+      margin-right: 0.25rem;
+    }
+    
+    .mr-2 {
+      margin-right: 0.5rem;
+    }
+    
+    .mr-3 {
+      margin-right: 0.75rem;
+    }
+    
+    .mr-4 {
+      margin-right: 1rem;
+    }
+    
+    .p-1 {
+      padding: 0.25rem;
+    }
+    
+    .p-2 {
+      padding: 0.5rem;
+    }
+    
+    .p-3 {
+      padding: 0.75rem;
+    }
+    
+    .p-4 {
+      padding: 1rem;
+    }
+    
+    .rounded {
+      border-radius: var(--radius);
+    }
+    
+    .rounded-full {
+      border-radius: 9999px;
+    }
+    
+    .border {
+      border: 1px solid var(--border);
+    }
+    
+    .border-t {
+      border-top: 1px solid var(--border);
+    }
+    
+    .border-b {
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .shadow {
+      box-shadow: var(--shadow);
+    }
+    
+    .shadow-lg {
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .grid {
+      display: grid;
+    }
+    
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    
+    @media (min-width: 640px) {
+      .sm\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .md\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+    
+    .gap-4 {
+      gap: 1rem;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .block {
+      display: block;
+    }
+    
+    .inline-block {
+      display: inline-block;
+    }
+    
+    .relative {
+      position: relative;
+    }
+    
+    .absolute {
+      position: absolute;
+    }
+    
+    .fixed {
+      position: fixed;
+    }
+    
+    .top-0 {
+      top: 0;
+    }
+    
+    .right-0 {
+      right: 0;
+    }
+    
+    .bottom-0 {
+      bottom: 0;
+    }
+    
+    .left-0 {
+      left: 0;
+    }
+    
+    .z-10 {
+      z-index: 10;
+    }
+    
+    .z-20 {
+      z-index: 20;
+    }
+    
+    .z-30 {
+      z-index: 30;
+    }
+    
+    .z-40 {
+      z-index: 40;
+    }
+    
+    .z-50 {
+      z-index: 50;
+    }
+    
+    .overflow-hidden {
+      overflow: hidden;
+    }
+    
+    .overflow-auto {
+      overflow: auto;
+    }
+    
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .whitespace-nowrap {
+      white-space: nowrap;
+    }
+    
+    .cursor-pointer {
+      cursor: pointer;
+    }
+    
+    .select-none {
+      user-select: none;
+    }
+    
+    /* App specific styles */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background-color: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.5rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--foreground);
+      cursor: pointer;
+      font-size: 1.25rem;
+      padding: 0.25rem;
+      border-radius: var(--radius);
+      transition: background-color var(--animation-duration);
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--card-hover);
+    }
+    
+    .main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      background-color: var(--background);
+    }
+    
+    .sidebar {
+      width: 250px;
+      background-color: var(--card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+    
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: var(--foreground);
+      cursor: pointer;
+      transition: background-color var(--animation-duration);
+    }
+    
+    .nav-item:hover {
+      background-color: var(--card-hover);
+    }
+    
+    .nav-item.active {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .nav-item i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+    
+    .content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background-color: var(--background);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .section-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .file-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .file-card {
+      cursor: pointer;
+    }
+    
+    .file-card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .file-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .file-card-title {
+      font-weight: 500;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .file-card-actions {
+      opacity: 0;
+      transition: opacity var(--animation-duration);
+    }
+    
+    .file-card:hover .file-card-actions {
+      opacity: 1;
+    }
+    
+    .file-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--animation-duration), visibility var(--animation-duration);
+    }
+    
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(20px);
+      transition: transform var(--animation-duration);
+    }
+    
+    .modal-backdrop.active .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.5rem;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      transition: background-color var(--animation-duration);
+    }
+    
+    .modal-close:hover {
+      background-color: var(--card-hover);
+    }
+    
+    .modal-body {
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .editor-container {
+      height: 500px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    .CodeMirror {
+      height: 100%;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+    
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    
+    .chart-container {
+      height: 300px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .replacement-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .history-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .token-generator {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .token-result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: var(--background);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    
+    .token-url {
+      word-break: break-all;
+      margin-bottom: 1rem;
+    }
+    
+    .qrcode-container {
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+    
+    .logs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .logs-table th,
+    .logs-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .logs-table th {
+      font-weight: 600;
+      background-color: var(--card);
+    }
+    
+    .logs-table tr:hover {
+      background-color: var(--card-hover);
+    }
+    
+    .settings-section {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .settings-section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .notification {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background-color: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      max-width: 350px;
+      z-index: 1100;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform var(--animation-duration), opacity var(--animation-duration);
+    }
+    
+    .notification.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .notification-icon {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .notification-success .notification-icon {
+      color: var(--success);
+    }
+    
+    .notification-error .notification-icon {
+      color: var(--error);
+    }
+    
+    .notification-warning .notification-icon {
+      color: var(--warning);
+    }
+    
+    .notification-info .notification-icon {
+      color: var(--info);
+    }
+    
+    .notification-message {
+      flex: 1;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1200;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--animation-duration), visibility var(--animation-duration);
+    }
+    
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: var(--background);
+    }
+    
+    .login-container {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .login-header h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .login-header p {
+      color: var(--muted);
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .help-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .help-section {
+      margin-bottom: 2rem;
+    }
+    
+    .help-section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .help-subsection {
+      margin-bottom: 1.5rem;
+    }
+    
+    .help-subsection-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    
+    .help-list {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .help-list li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .help-code {
+      background-color: var(--background);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      overflow-x: auto;
+    }
+    
+    .help-note {
+      background-color: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    
+    #app {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    #login-section {
+      display: flex;
+      height: 100vh;
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      width: 100%;
+    }
+    
+    /* 令牌和日志表格样式改进 */
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .table th, 
+    .table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .table th {
+      background-color: var(--card);
+      color: var(--foreground);
+      font-weight: 600;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .table td {
+      color: var(--foreground);
+      word-break: break-word;
+    }
+    
+    .table tr:hover {
+      background-color: var(--card-hover);
+    }
+    
+    /* 提高移动设备适配性 */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+        transition: transform 0.3s ease;
+        position: absolute;
+        height: 100%;
+        z-index: 100;
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      
+      .nav-item i {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+      
+      .header {
+        padding: 0.75rem;
+      }
+      
+      .logo {
+        font-size: 1.1rem;
+      }
+      
+      .menu-toggle {
+        display: block !important;
+        background: none;
+        border: none;
+        color: var(--foreground);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+    }
+    
+    .menu-toggle {
+      display: none;
+    }
+    
+    /* 多选替换规则 */
+    .replacement-select-multiple {
+      height: auto;
+      min-height: 38px;
+      background-color: var(--card);
+    }
+    
+    .multiselect-item {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      border-radius: 4px;
+      padding: 3px 8px;
+      margin: 2px 4px 2px 0;
+      font-size: 0.8rem;
+    }
+    
+    .multiselect-remove {
+      margin-left: 5px;
+      cursor: pointer;
+    }
+    
+    /* 多规则下拉菜单 */
+    .replacement-dropdown {
+      position: relative;
+    }
+    
+    .replacement-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: var(--shadow);
+      z-index: 100;
+      display: none;
+    }
+    
+    .replacement-dropdown-menu.show {
+      display: block;
+    }
+    
+    .replacement-dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    
+    .replacement-dropdown-item:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+    
+    /* 信息卡片样式 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .info-item {
+      background-color: var(--background);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    
+    .info-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+    }
+    
+    .info-value {
+      font-size: 1.1rem;
+      word-break: break-all;
+    }
+    
+    /* 修复黑暗模式底部白色问题 */
+    body, html, .main-content, .content {
+      min-height: 100%;
+      background-color: var(--background);
+    }
+    
+    /* 令牌显示完整而不是省略号 */
+    .token-display {
+      font-family: var(--font-mono);
+      word-break: break-word;
+      max-width: 100%;
+      display: inline-block;
+      line-height: 1.4;
+      font-size: 0.85rem;
+      background-color: var(--background);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    
+    /* 修复移动端表格显示问题 */
+    @media (max-width: 768px) {
+      .table-mobile-optimized {
+        display: block;
+        width: 100%;
+      }
+      
+      .table-mobile-optimized thead {
+        display: none;
+      }
+      
+      .table-mobile-optimized tbody {
+        display: block;
+        width: 100%;
+      }
+      
+      .table-mobile-optimized tr {
+        display: block;
+        margin-bottom: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background-color: var(--card);
+        padding: 8px;
+      }
+      
+      .table-mobile-optimized td {
+        display: flex;
+        border: none;
+        padding: 8px 4px;
+        text-align: left;
+        align-items: center;
+      }
+      
+      .table-mobile-optimized td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        width: 120px;
+        min-width: 120px;
+        margin-right: 12px;
+      }
+      
+      .logs-card {
+        padding: 0.75rem;
+      }
+      
+      .table-actions {
+        justify-content: flex-start;
+      }
+    }
+    
+    /* 历史版本选项卡 */
+    .history-tabs {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+      padding-bottom: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) var(--card);
+    }
+    
+    .history-tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .history-tabs::-webkit-scrollbar-track {
+      background: var(--card);
+    }
+    
+    .history-tabs::-webkit-scrollbar-thumb {
+      background-color: var(--primary);
+      border-radius: 4px;
+    }
+    
+    .history-tab {
+      padding: 0.5rem 1rem;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--muted);
+    }
+    
+    .history-tab:hover {
+      color: var(--primary);
+    }
+    
+    .history-tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .history-versions {
+      margin-bottom: 1rem;
+    }
+    
+    .history-version-item {
+      display: flex;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      align-items: center;
+      background-color: var(--card);
+    }
+    
+    .history-version-item:hover {
+      border-color: var(--primary-light);
+      background-color: var(--primary-light);
+    }
+    
+    .history-version-date {
+      flex-grow: 1;
+    }
+    
+    .history-version-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .history-version-badge {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background-color: var(--primary);
+    }
+    
+    .history-empty {
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="login-section" class="login-screen">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>JSON 配置管理平台</h1>
+        <p>请输入密码登录系统</p>
+      </div>
+      <div class="login-form">
+        <div class="form-group">
+          <label for="login-password">密码</label>
+          <input type="password" id="login-password" class="form-control" placeholder="请输入密码">
+        </div>
+        <button id="login-btn" class="btn btn-primary btn-block">登录</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand flex items-center">
+        <button id="menu-toggle" class="menu-toggle mr-2">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="m-0">JSON 配置管理平台</h1>
+      </div>
+      <div class="header-actions">
+        <button id="theme-toggle" class="btn btn-icon" title="切换主题">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button id="logout-btn" class="btn btn-icon" title="退出登录">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <div class="nav-item active" data-section="dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>仪表盘</span>
+          </div>
+          <div class="nav-item" data-section="files">
+            <i class="fas fa-file-code"></i>
+            <span>文件管理</span>
+          </div>
+          <div class="nav-item" data-section="replacements">
+            <i class="fas fa-exchange-alt"></i>
+            <span>替换规则</span>
+          </div>
+          <div class="nav-item" data-section="history">
+            <i class="fas fa-history"></i>
+            <span>历史版本</span>
+          </div>
+          <div class="nav-item" data-section="access">
+            <i class="fas fa-link"></i>
+            <span>访问管理</span>
+          </div>
+          <div class="nav-item" data-section="logs">
+            <i class="fas fa-list-alt"></i>
+            <span>访问日志</span>
+          </div>
+          <div class="nav-item" data-section="settings">
+            <i class="fas fa-cog"></i>
+            <span>设置</span>
+          </div>
+          <div class="nav-item" data-section="help">
+            <i class="fas fa-question-circle"></i>
+            <span>帮助</span>
+          </div>
+        </nav>
+      </div>
+      
+      <!-- Content Area -->
+      <div class="content" id="content">
+        <!-- Content will be loaded here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modals -->
+  <div class="modal-backdrop" id="editor-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="editor-modal-title">编辑配置文件</h3>
+        <button class="modal-close" id="editor-modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editor-filename">文件名</label>
+          <input type="text" id="editor-filename" class="form-control" placeholder="example.json">
+        </div>
+        <div class="editor-container" id="json-editor"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="editor-cancel">取消</button>
+        <button class="btn btn-primary" id="editor-save">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-backdrop" id="replacement-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="replacement-modal-title">添加替换规则</h3>
+        <button class="modal-close" id="replacement-modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="replacement-name">规则名称</label>
+          <input type="text" id="replacement-name" class="form-control" placeholder="my-rule">
+        </div>
+        <div class="form-group">
+          <label for="replacement-path">JSON路径</label>
+          <input type="text" id="replacement-path" class="form-control" placeholder="api.url">
+          <small class="form-text">使用点表示法指定要替换的JSON路径，例如 "log.level" 或 "servers.0.host"</small>
+        </div>
+        <div class="form-group">
+          <label for="replacement-content">替换内容</label>
+          <div class="editor-container" id="replacement-editor"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="replacement-cancel">取消</button>
+        <button class="btn btn-primary" id="replacement-save">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-backdrop" id="history-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="history-modal-title">历史版本</h3>
+        <button class="modal-close" id="history-modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="editor-container" id="history-editor"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="history-close">关闭</button>
+        <button class="btn btn-primary" id="history-restore">恢复此版本</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <div class="notification-icon">
+      <i class="fas fa-info-circle"></i>
+    </div>
+    <div class="notification-message" id="notification-message"></div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+  
+  <script>
+    // Global variables
+    let editor = null;
+    let replacementEditor = null;
+    let historyEditor = null;
+    let currentFile = null;
+    let currentHistoryFile = null;
+    let currentSection = 'dashboard';
+    let accessChart = null;
+    let filesChart = null;
+    let selectedHistoryTab = null;
+    
+    // Initialize app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication
+      checkAuthentication();
+      
+      // Add event listeners
+      addEventListeners();
+      
+      // Initialize theme
+      initTheme();
+    });
+    
+    // Check if user is authenticated
+    function checkAuthentication() {
+      fetch('check_auth.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.authenticated) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            loadSection('dashboard');
+          }
+        })
+        .catch(error => {
+          console.error('检查认证状态失败:', error);
+        });
+    }
+    
+    // Add event listeners
+    function addEventListeners() {
+      // Login
+      document.getElementById('login-btn').addEventListener('click', login);
+      document.getElementById('login-password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+      
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      
+      // Theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+      
+      // Mobile menu toggle
+      document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
+      
+      // Navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.getAttribute('data-section');
+          loadSection(section);
+          
+          // 在移动视图下，点击导航项后自动收起侧边栏
+          if (window.innerWidth <= 768) {
+            toggleSidebar(false);
+          }
+        });
+      });
+      
+      // Editor modal
+      document.getElementById('editor-modal-close').addEventListener('click', closeEditorModal);
+      document.getElementById('editor-cancel').addEventListener('click', closeEditorModal);
+      document.getElementById('editor-save').addEventListener('click', saveFile);
+      
+      // Replacement modal
+      document.getElementById('replacement-modal-close').addEventListener('click', closeReplacementModal);
+      document.getElementById('replacement-cancel').addEventListener('click', closeReplacementModal);
+      document.getElementById('replacement-save').addEventListener('click', saveReplacement);
+      
+      // History modal
+      document.getElementById('history-modal-close').addEventListener('click', closeHistoryModal);
+      document.getElementById('history-close').addEventListener('click', closeHistoryModal);
+      document.getElementById('history-restore').addEventListener('click', restoreHistory);
+      
+      // Handle outside click to close sidebar on mobile
+      document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        
+        if (window.innerWidth <= 768 && sidebar.classList.contains('show') && 
+           !sidebar.contains(e.target) && e.target !== menuToggle && !menuToggle.contains(e.target)) {
+          toggleSidebar(false);
+        }
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          const sidebar = document.getElementById('sidebar');
+          if (sidebar.classList.contains('show')) {
+            sidebar.classList.remove('show');
+          }
+        }
+      });
+    }
+    
+    // Toggle sidebar for mobile view
+    function toggleSidebar(show) {
+      const sidebar = document.getElementById('sidebar');
+      
+      if (typeof show === 'boolean') {
+        if (show) {
+          sidebar.classList.add('show');
+        } else {
+          sidebar.classList.remove('show');
+        }
+      } else {
+        sidebar.classList.toggle('show');
+      }
+    }
+    
+    // Initialize theme
+    function initTheme() {
+      // Check for saved theme preference
+      const savedTheme = localStorage.getItem('theme');
+      
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+      } else if (savedTheme === 'auto') {
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark-mode');
+          document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        // Listen for changes in system preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+          if (e.matches) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+          } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+          }
+        });
+      }
+    }
+    
+    // Toggle theme
+    function toggleTheme() {
+      if (document.body.classList.contains('dark-mode')) {
+        document.body.classList.remove('dark-mode');
+        document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('theme', 'dark');
+      }
+      
+      // Update charts if they exist
+      if (accessChart) {
+        accessChart.update();
+      }
+      if (filesChart) {
+        filesChart.update();
+      }
+    }
+    
+    // Login
+    function login() {
+      const password = document.getElementById('login-password').value;
+      
+      if (!password) {
+        showNotification('请输入密码', 'error');
+        return;
+      }
+      
+      showLoading();
+      
+      fetch('login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: password })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showNotification('登录成功');
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            loadSection('dashboard');
+          } else {
+            showNotification(data.message, 'error');
+          }
+        })
+        .catch(error => {
+          console.error('登录失败:', error);
+          showNotification('登录失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Logout
+    function logout() {
+      showLoading();
+      
+      fetch('logout.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('login-section').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-password').value = '';
+          }
+        })
+        .catch(error => {
+          console.error('登出失败:', error);
+          showNotification('登出失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Load section
+    function loadSection(section) {
+      // Update active nav item
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('data-section') === section) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      
+      // Save current section
+      currentSection = section;
+      
+      // Load section content
+      switch (section) {
+        case 'dashboard':
+          loadDashboard();
+          break;
+        case 'files':
+          loadFiles();
+          break;
+        case 'replacements':
+          loadReplacements();
+          break;
+        case 'history':
+          loadHistory();
+          break;
+        case 'access':
+          loadAccess();
+          break;
+        case 'logs':
+          loadLogs();
+          break;
+        case 'settings':
+          loadSettings();
+          break;
+        case 'help':
+          loadHelp();
+          break;
+      }
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      const notificationMessage = document.getElementById('notification-message');
+      
+      // Set message
+      notificationMessage.textContent = message;
+      
+      // Set type
+      notification.className = 'notification';
+      notification.classList.add(`notification-${type}`);
+      
+      // Set icon
+      const iconElement = notification.querySelector('.notification-icon i');
+      switch (type) {
+        case 'success':
+          iconElement.className = 'fas fa-check-circle';
+          break;
+        case 'error':
+          iconElement.className = 'fas fa-times-circle';
+          break;
+        case 'warning':
+          iconElement.className = 'fas fa-exclamation-triangle';
+          break;
+        case 'info':
+          iconElement.className = 'fas fa-info-circle';
+          break;
+      }
+      
+      // Show notification
+      notification.classList.add('active');
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        notification.classList.remove('active');
+      }, 3000);
+    }
+    
+    // Show loading overlay
+    function showLoading() {
+      document.getElementById('loading-overlay').classList.add('active');
+    }
+    
+    // Hide loading overlay
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.remove('active');
+    }
+    
+    // Load dashboard
+    function loadDashboard() {
+      showLoading();
+      
+      // Set temporary content
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">仪表盘</h2>
+        </div>
+        
+        <div class="dashboard-stats">
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">配置文件</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">替换规则</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">历史版本</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">访问次数</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">访问趋势</h3>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="access-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Fetch dashboard stats
+      fetch('dashboard_stats.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            document.getElementById('content').innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">仪表盘</h2>
+              </div>
+              
+              <div class="dashboard-stats">
+                <div class="card stat-card">
+                  <div class="stat-value">${data.totalFiles}</div>
+                  <div class="stat-label">配置文件</div>
+                </div>
+                <div class="card stat-card">
+                  <div class="stat-value">${data.totalReplacements}</div>
+                  <div class="stat-label">替换规则</div>
+                </div>
+                <div class="card stat-card">
+                  <div class="stat-value">${data.totalHistory}</div>
+                  <div class="stat-label">历史版本</div>
+                </div>
+                <div class="card stat-card">
+                  <div class="stat-value">${data.totalAccesses}</div>
+                  <div class="stat-label">访问次数</div>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">访问趋势</h3>
+                </div>
+                <div class="card-body">
+                  <div class="chart-container">
+                    <canvas id="access-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            // 获取访问趋势数据
+            fetch('chart_data.php?type=access')
+              .then(response => response.json())
+              .then(chartData => {
+                if (chartData.success) {
+                  initializeAccessChart(chartData.labels, chartData.values);
+                }
+              })
+              .catch(error => {
+                console.error('获取图表数据失败:', error);
+              });
+          } else {
+            showNotification(data.message || '加载仪表盘失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载仪表盘失败:', error);
+          showNotification('加载仪表盘失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // 仅初始化访问趋势图表
+    function initializeAccessChart(labels, data) {
+      if (!labels || !data) {
+        labels = ['今天'];
+        data = [0];
+      }
+      
+      const accessCtx = document.getElementById('access-chart').getContext('2d');
+      accessChart = new Chart(accessCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '访问次数',
+            data: data,
+            fill: false,
+            borderColor: '#0070f3',
+            backgroundColor: 'rgba(0, 112, 243, 0.1)',
+            tension: 0.1,
+            borderWidth: 2,
+            pointBackgroundColor: '#0070f3',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)'
+            },
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    }
+    
+    // Load files section
+    function loadFiles() {
+      showLoading();
+      
+      // Set temporary content
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">文件管理</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="addNewFile()">
+              <i class="fas fa-plus"></i> 添加文件
+            </button>
+          </div>
+        </div>
+        
+        <div class="file-list">
+          <div class="alert alert-info">正在加载文件列表...</div>
+        </div>
+      `;
+      
+      fetch('get_files.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            let fileListHtml = '';
+            
+            if (data.files && data.files.length > 0) {
+              data.files.forEach(file => {
+                // Format file size nicely (KB, MB)
+                const size = file.size < 1024 ? file.size + ' B' : 
+                          file.size < 1048576 ? (file.size/1024).toFixed(2) + ' KB' : 
+                          (file.size/1048576).toFixed(2) + ' MB';
+                
+                // Format updated date
+                const updated = new Date(file.time * 1000).toLocaleString();
+                
+                fileListHtml += `
+                  <div class="card file-card" data-file="${file.name}">
+                    <div class="card-header">
+                      <h3 class="card-title file-card-title">${file.name}</h3>
+                      <div class="file-card-actions">
+                        <button class="btn btn-icon btn-sm" onclick="editFile('${file.name}', event)">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-icon btn-sm" onclick="deleteFile('${file.name}', event)">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="file-card-meta">
+                        <span>${size}</span>
+                        <span>${updated}</span>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              });
+            } else {
+              fileListHtml = '<div class="alert alert-info">没有配置文件，点击 "添加文件" 按钮创建一个</div>';
+            }
+            
+            document.getElementById('content').innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">文件管理</h2>
+                <div class="section-actions">
+                  <button class="btn btn-primary" onclick="addNewFile()">
+                    <i class="fas fa-plus"></i> 添加文件
+                  </button>
+                </div>
+              </div>
+              
+              <div class="file-list">
+                ${fileListHtml}
+              </div>
+            `;
+            
+            // Add event listeners to file cards
+            document.querySelectorAll('.file-card').forEach(card => {
+              card.addEventListener('click', function(e) {
+                // Only handle click if it's not on the buttons
+                if (!e.target.closest('.btn')) {
+                  const fileName = this.getAttribute('data-file');
+                  viewFile(fileName);
+                }
+              });
+            });
+          } else {
+            showNotification(data.message || '加载文件列表失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载文件列表失败:', error);
+          showNotification('加载文件列表失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Add new file
+    function addNewFile() {
+      currentFile = null;
+      document.getElementById('editor-modal-title').textContent = '添加配置文件';
+      document.getElementById('editor-filename').value = '';
+      document.getElementById('editor-filename').disabled = false;
+      
+      // Initialize editor if needed
+      if (!editor) {
+        editor = CodeMirror(document.getElementById('json-editor'), {
+          mode: { name: 'javascript', json: true },
+          theme: 'default',
+          lineNumbers: true,
+          indentUnit: 2,
+          tabSize: 2,
+          autoCloseBrackets: true,
+          matchBrackets: true,
+          gutters: ['CodeMirror-lint-markers'],
+          lint: true,
+          extraKeys: { 'Ctrl-Space': 'autocomplete' }
+        });
+      }
+      
+      // Set empty content
+      editor.setValue('{\n  \n}');
+      
+      // Show modal
+      document.getElementById('editor-modal').classList.add('active');
+    }
+    
+    // Edit file
+    function editFile(fileName, event) {
+      if (event) event.stopPropagation();
+      
+      showLoading();
+      
+      fetch(`get_config.php?file=${encodeURIComponent(fileName)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            currentFile = fileName;
+            document.getElementById('editor-modal-title').textContent = `编辑配置文件: ${fileName}`;
+            document.getElementById('editor-filename').value = fileName;
+            document.getElementById('editor-filename').disabled = true;
+            
+            // Initialize editor if needed
+            if (!editor) {
+              editor = CodeMirror(document.getElementById('json-editor'), {
+                mode: { name: 'javascript', json: true },
+                theme: 'default',
+                lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                gutters: ['CodeMirror-lint-markers'],
+                lint: true,
+                extraKeys: { 'Ctrl-Space': 'autocomplete' }
+              });
+            }
+            
+            // Set content
+            editor.setValue(data.content);
+            
+            // Show modal
+            document.getElementById('editor-modal').classList.add('active');
+          } else {
+            showNotification(data.message || '获取文件内容失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('获取文件内容失败:', error);
+          showNotification('获取文件内容失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // View file
+    function viewFile(fileName) {
+      showLoading();
+      
+      fetch(`get_config.php?file=${encodeURIComponent(fileName)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            editFile(fileName);
+          } else {
+            showNotification(data.message || '获取文件内容失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('获取文件内容失败:', error);
+          showNotification('获取文件内容失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Delete file
+    function deleteFile(fileName, event) {
+      if (event) event.stopPropagation();
+      
+      if (confirm(`确定要删除 ${fileName} 吗？此操作不可撤销。`)) {
+        showLoading();
+        
+        fetch(`save_config.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            file: fileName
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification(`文件 ${fileName} 已成功删除`);
+              
+              // Reload current section
+              loadSection(currentSection);
+            } else {
+              showNotification(data.message || '删除文件失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('删除文件失败:', error);
+            showNotification('删除文件失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+    // Close editor modal
+    function closeEditorModal() {
+      document.getElementById('editor-modal').classList.remove('active');
+    }
+    
+    // Save file
+    function saveFile() {
+      const fileName = document.getElementById('editor-filename').value.trim();
+      
+      if (!fileName) {
+        showNotification('请输入文件名', 'error');
+        return;
+      }
+      
+      if (!fileName.endsWith('.json')) {
+        showNotification('文件名必须以 .json 结尾', 'error');
+        return;
+      }
+      
+      // Validate JSON
+      try {
+        JSON.parse(editor.getValue());
+      } catch (e) {
+        showNotification('无效的 JSON 格式: ' + e.message, 'error');
+        return;
+      }
+      
+      showLoading();
+      
+      fetch('save_config.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          file: fileName,
+          content: editor.getValue()
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showNotification(`文件 ${fileName} 已成功保存`);
+            closeEditorModal();
+            
+            // Reload current section
+            loadSection(currentSection);
+          } else {
+            showNotification(data.message || '保存文件失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('保存文件失败:', error);
+          showNotification('保存文件失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Load replacements section
+    function loadReplacements() {
+      showLoading();
+      
+      // Set temporary content
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">替换规则</h2>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="addNewReplacement()">
+              <i class="fas fa-plus"></i> 添加规则
+            </button>
+          </div>
+        </div>
+        
+        <div class="replacement-list">
+          <div class="alert alert-info">正在加载替换规则...</div>
+        </div>
+      `;
+      
+      fetch('json_replacements.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            let replacementListHtml = '';
+            
+            if (data.replacements && Object.keys(data.replacements).length > 0) {
+              Object.entries(data.replacements).forEach(([name, replacement]) => {
+                replacementListHtml += `
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">${name}</h3>
+                      <div class="card-actions">
+                        <button class="btn btn-icon btn-sm" onclick="editReplacement('${name}')">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-icon btn-sm" onclick="deleteReplacement('${name}')">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="mb-2"><strong>JSON路径:</strong> ${replacement.path}</div>
+                      <div><strong>替换内容:</strong> <code>${JSON.stringify(replacement.content)}</code></div>
+                    </div>
+                  </div>
+                `;
+              });
+            } else {
+              replacementListHtml = '<div class="alert alert-info">没有替换规则，点击 "添加规则" 按钮创建一个</div>';
+            }
+            
+            document.getElementById('content').innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">替换规则</h2>
+                <div class="section-actions">
+                  <button class="btn btn-primary" onclick="addNewReplacement()">
+                    <i class="fas fa-plus"></i> 添加规则
+                  </button>
+                </div>
+              </div>
+              
+              <div class="replacement-list">
+                ${replacementListHtml}
+              </div>
+            `;
+          } else {
+            showNotification(data.message || '加载替换规则失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载替换规则失败:', error);
+          showNotification('加载替换规则失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Add new replacement rule
+    function addNewReplacement() {
+      document.getElementById('replacement-modal-title').textContent = '添加替换规则';
+      document.getElementById('replacement-name').value = '';
+      document.getElementById('replacement-name').disabled = false;
+      document.getElementById('replacement-path').value = '';
+      
+      // Initialize editor if needed
+      if (!replacementEditor) {
+        replacementEditor = CodeMirror(document.getElementById('replacement-editor'), {
+          mode: { name: 'javascript', json: true },
+          theme: 'default',
+          lineNumbers: true,
+          indentUnit: 2,
+          tabSize: 2,
+          autoCloseBrackets: true,
+          matchBrackets: true,
+          gutters: ['CodeMirror-lint-markers'],
+          lint: true,
+          extraKeys: { 'Ctrl-Space': 'autocomplete' }
+        });
+      }
+      
+      // Set empty content
+      replacementEditor.setValue('');
+      
+      // Show modal
+      document.getElementById('replacement-modal').classList.add('active');
+    }
+    
+    // Edit replacement rule
+    function editReplacement(name) {
+      showLoading();
+      
+      fetch('json_replacements.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success && data.replacements && data.replacements[name]) {
+            const replacement = data.replacements[name];
+            
+            document.getElementById('replacement-modal-title').textContent = `编辑替换规则: ${name}`;
+            document.getElementById('replacement-name').value = name;
+            document.getElementById('replacement-name').disabled = true;
+            document.getElementById('replacement-path').value = replacement.path;
+            
+            // Initialize editor if needed
+            if (!replacementEditor) {
+              replacementEditor = CodeMirror(document.getElementById('replacement-editor'), {
+                mode: { name: 'javascript', json: true },
+                theme: 'default',
+                lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                gutters: ['CodeMirror-lint-markers'],
+                lint: true,
+                extraKeys: { 'Ctrl-Space': 'autocomplete' }
+              });
+            }
+            
+            // Set content
+            replacementEditor.setValue(JSON.stringify(replacement.content, null, 2));
+            
+            // Show modal
+            document.getElementById('replacement-modal').classList.add('active');
+          } else {
+            showNotification('获取替换规则失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('获取替换规则失败:', error);
+          showNotification('获取替换规则失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Delete replacement rule
+    function deleteReplacement(name) {
+      if (confirm(`确定要删除替换规则 ${name} 吗？此操作不可撤销。`)) {
+        showLoading();
+        
+        fetch('json_replacements.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            name: name
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification(`替换规则 ${name} 已成功删除`);
+              
+              // Reload current section
+              loadSection(currentSection);
+            } else {
+              showNotification(data.message || '删除替换规则失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('删除替换规则失败:', error);
+            showNotification('删除替换规则失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+    // Close replacement modal
+    function closeReplacementModal() {
+      document.getElementById('replacement-modal').classList.remove('active');
+    }
+    
+    // Save replacement rule
+    function saveReplacement() {
+      const name = document.getElementById('replacement-name').value.trim();
+      const path = document.getElementById('replacement-path').value.trim();
+      
+      if (!name) {
+        showNotification('请输入规则名称', 'error');
+        return;
+      }
+      
+      if (!path) {
+        showNotification('请输入JSON路径', 'error');
+        return;
+      }
+      
+      // Validate JSON content
+      let content;
+      try {
+        content = JSON.parse(replacementEditor.getValue());
+      } catch (e) {
+        showNotification('无效的 JSON 格式: ' + e.message, 'error');
+        return;
+      }
+      
+      showLoading();
+      
+      const isNew = document.getElementById('replacement-name').disabled === false;
+      const action = isNew ? 'add' : 'update';
+      
+      fetch('json_replacements.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: action,
+          name: name,
+          oldName: isNew ? '' : name,
+          path: path,
+          content: content
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showNotification(`替换规则 ${name} 已成功保存`);
+            closeReplacementModal();
+            
+            // Reload current section
+            loadSection(currentSection);
+          } else {
+            showNotification(data.message || '保存替换规则失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('保存替换规则失败:', error);
+          showNotification('保存替换规则失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // 加载历史版本（优化版本）
+    function loadHistory() {
+      showLoading();
+      
+      // 设置临时内容
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">历史版本</h2>
+        </div>
+        
+        <div class="alert alert-info">正在加载历史版本...</div>
+      `;
+      
+      // 获取所有具有历史版本的文件列表
+      fetch('history.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const history = data.history || [];
+            
+            if (history.length === 0) {
+              document.getElementById('content').innerHTML = `
+                <div class="section-header">
+                  <h2 class="section-title">历史版本</h2>
+                </div>
+                
+                <div class="alert alert-info">没有历史版本记录</div>
+              `;
+              return;
+            }
+            
+            // 创建历史版本页面
+            let historyHtml = `
+              <div class="section-header">
+                <h2 class="section-title">历史版本</h2>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">文件历史记录</h3>
+                </div>
+                <div class="card-body">
+                  <p>选择文件查看其历史版本：</p>
+                  <div class="history-tabs">
+            `;
+            
+            // 添加文件选项卡
+            history.forEach((item, index) => {
+              historyHtml += `
+                <div class="history-tab${index === 0 ? ' active' : ''}" data-file="${item.file}">
+                  ${item.file} <span class="badge badge-primary ml-1">${item.historyCount}</span>
+                </div>
+              `;
+            });
+            
+            historyHtml += `
+                  </div>
+                  
+                  <div id="history-versions" class="history-versions">
+                    <div class="alert alert-info">请选择文件查看其历史版本</div>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            document.getElementById('content').innerHTML = historyHtml;
+            
+            // 添加选项卡点击事件
+            document.querySelectorAll('.history-tab').forEach(tab => {
+              tab.addEventListener('click', function() {
+                const file = this.getAttribute('data-file');
+                
+                // 更新激活的选项卡
+                document.querySelectorAll('.history-tab').forEach(t => {
+                  t.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 记录当前选择的文件
+                selectedHistoryTab = file;
+                
+                // 加载该文件的历史版本
+                loadFileHistory(file);
+              });
+            });
+            
+            // 自动加载第一个文件的历史版本
+            if (history.length > 0) {
+              selectedHistoryTab = history[0].file;
+              loadFileHistory(selectedHistoryTab);
+            }
+          } else {
+            showNotification(data.message || '加载历史版本失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载历史版本失败:', error);
+          showNotification('加载历史版本失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // 加载特定文件的历史版本
+    function loadFileHistory(file) {
+      showLoading();
+      
+      document.getElementById('history-versions').innerHTML = `
+        <div class="alert alert-info">正在加载 ${file} 的历史版本...</div>
+      `;
+      
+      fetch(`history.php?list_history_for=${encodeURIComponent(file)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const history = data.history || [];
+            
+            if (history.length === 0) {
+              document.getElementById('history-versions').innerHTML = `
+                <div class="history-empty">
+                  <i class="fas fa-history fa-3x mb-3"></i>
+                  <p>没有找到 ${file} 的历史版本</p>
+                </div>
+              `;
+              return;
+            }
+            
+            let historyItemsHtml = '';
+            history.forEach(item => {
+              historyItemsHtml += `
+                <div class="history-version-item">
+                  <div class="history-version-badge"></div>
+                  <div class="history-version-date">
+                    <div class="font-medium">${item.formatted_time}</div>
+                    <div class="text-sm text-muted">大小: ${(item.size / 1024).toFixed(2)} KB</div>
+                  </div>
+                  <div class="history-version-actions">
+                    <button class="btn btn-sm btn-outline" onclick="viewHistoryVersion('${item.file}')">
+                      <i class="fas fa-eye"></i> 查看
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="restoreHistoryVersion('${item.file}', '${item.original}', '${item.formatted_time}')">
+                      <i class="fas fa-undo"></i> 恢复
+                    </button>
+                  </div>
+                </div>
+              `;
+            });
+            
+            document.getElementById('history-versions').innerHTML = historyItemsHtml;
+          } else {
+            showNotification(data.message || '加载文件历史版本失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载文件历史版本失败:', error);
+          showNotification('加载文件历史版本失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // 查看历史版本内容
+    function viewHistoryVersion(historyFile) {
+      showLoading();
+      
+      fetch(`history.php?file=${encodeURIComponent(historyFile)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            currentHistoryFile = historyFile;
+            
+            document.getElementById('history-modal-title').textContent = `历史版本: ${historyFile}`;
+            
+            // 初始化编辑器（如果需要）
+            if (!historyEditor) {
+              historyEditor = CodeMirror(document.getElementById('history-editor'), {
+                mode: { name: 'javascript', json: true },
+                theme: 'default',
+                lineNumbers: true,
+                indentUnit: 2,
+                tabSize: 2,
+                readOnly: true
+              });
+            }
+            
+            // 设置内容
+            historyEditor.setValue(data.content);
+            
+            // 显示模态框
+            document.getElementById('history-modal').classList.add('active');
+          } else {
+            showNotification(data.message || '获取历史版本失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('获取历史版本失败:', error);
+          showNotification('获取历史版本失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // 恢复历史版本
+    function restoreHistoryVersion(historyFile, originalFile, versionTime) {
+      if (confirm(`确定要将 ${originalFile} 恢复到 ${versionTime} 的版本吗？当前版本将会被覆盖。`)) {
+        showLoading();
+        
+        fetch('history.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'restore',
+            file: historyFile
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification(`文件 ${originalFile} 已成功恢复到 ${versionTime} 的版本`);
+              
+              // 刷新当前文件的历史版本
+              if (selectedHistoryTab) {
+                loadFileHistory(selectedHistoryTab);
+              }
+            } else {
+              showNotification(data.message || '恢复历史版本失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('恢复历史版本失败:', error);
+            showNotification('恢复历史版本失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+    // Close history modal
+    function closeHistoryModal() {
+      document.getElementById('history-modal').classList.remove('active');
+    }
+    
+    // Restore history
+    function restoreHistory() {
+      if (!currentHistoryFile) return;
+      
+      const matchResult = currentHistoryFile.match(/(.+)_\d{14}\.json$/);
+      if (!matchResult) {
+        showNotification('无法识别历史文件名格式', 'error');
+        return;
+      }
+      
+      const originalFileName = matchResult[1] + '.json';
+      
+      if (confirm(`确定要恢复 ${originalFileName} 到此历史版本吗？当前版本将会被覆盖。`)) {
+        showLoading();
+        
+        fetch('history.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'restore',
+            file: currentHistoryFile
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification(`文件 ${originalFileName} 已成功恢复到历史版本`);
+              closeHistoryModal();
+              
+              // 刷新当前文件的历史版本
+              if (selectedHistoryTab) {
+                loadFileHistory(selectedHistoryTab);
+              }
+            } else {
+              showNotification(data.message || '恢复历史版本失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('恢复历史版本失败:', error);
+            showNotification('恢复历史版本失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+    // Load access section
+    function loadAccess() {
+      showLoading();
+      
+      // Set temporary content
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">访问管理</h2>
+        </div>
+        
+        <div class="alert alert-info">正在加载访问管理...</div>
+      `;
+      
+      // Load JSON files list to use in the token generator
+      fetch('get_files.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const files = data.files || [];
+            const filesOptions = files.map(file => 
+              `<option value="${file.name}">${file.name}</option>`
+            ).join('');
+            
+            // Get access tokens
+            return fetch('access_token.php')
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
+              })
+              .then(tokenData => {
+                const tokens = tokenData.success && tokenData.tokens ? tokenData.tokens : [];
+                let tokenRows = '';
+                
+                if (tokens.length > 0) {
+                  tokens.forEach(token => {
+                    const created = new Date(token.created * 1000).toLocaleString();
+                    const expiry = token.expiry ? new Date(token.expiry * 1000).toLocaleString() : '永不过期';
+                    const fileList = token.file || '所有文件';
+                    const replacement = token.replacement || '-';
+                    
+                    tokenRows += `
+                      <tr>
+                        <td data-label="令牌"><div class="token-display">${token.token}</div></td>
+                        <td data-label="创建时间">${created}</td>
+                        <td data-label="过期时间">${expiry}</td>
+                        <td data-label="允许访问的文件">${fileList}</td>
+                        <td data-label="替换规则">${replacement}</td>
+                        <td data-label="操作">
+                          <button class="btn btn-icon btn-sm" onclick="revokeToken('${token.token}')">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  });
+                } else {
+                  tokenRows = '<tr><td colspan="6" class="text-center">没有有效的访问令牌</td></tr>';
+                }
+                
+                document.getElementById('content').innerHTML = `
+                  <div class="section-header">
+                    <h2 class="section-title">访问管理</h2>
+                  </div>
+                  
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <h3 class="card-title">访问令牌</h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="token-generator">
+                        <div class="form-group">
+                          <label for="token-expire">令牌有效期</label>
+                          <select id="token-expire" class="form-control">
+                            <option value="3600">1小时</option>
+                            <option value="86400">1天</option>
+                            <option value="604800">1周</option>
+                            <option value="2592000">1个月</option>
+                            <option value="31536000">1年</option>
+                            <option value="0" selected>永久有效</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label for="token-file">允许访问的文件</label>
+                          <select id="token-file" class="form-control">
+                            <option value="">-- 所有文件 --</option>
+                            ${filesOptions}
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label for="token-replacement">应用替换规则（可选）</label>
+                          <select id="token-replacement" class="form-control">
+                            <option value="">-- 不应用替换规则 --</option>
+                            <option value="fetch-replacements">-- 加载替换规则 --</option>
+                          </select>
+                        </div>
+                        <button id="generate-token-btn" class="btn btn-primary">生成访问令牌</button>
+                        
+                        <div id="token-result" class="token-result" style="display: none;">
+                          <div class="form-group">
+                            <label>访问链接:</label>
+                            <div class="token-url" id="token-url"></div>
+                          </div>
+                          <div class="qrcode-container" id="qrcode">
+                          </div>
+                          <button id="copy-token-btn" class="btn btn-secondary btn-block">复制链接</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">当前有效的访问令牌</h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-mobile-optimized">
+                          <thead>
+                            <tr>
+                              <th style="min-width: 200px;">令牌</th>
+                              <th>创建时间</th>
+                              <th>过期时间</th>
+                              <th>允许访问的文件</th>
+                              <th>替换规则</th>
+                              <th>操作</th>
+                            </tr>
+                          </thead>
+                          <tbody id="tokens-list">
+                            ${tokenRows}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                
+                // Add event listener for token generation
+                document.getElementById('generate-token-btn').addEventListener('click', generateToken);
+                document.getElementById('copy-token-btn').addEventListener('click', copyTokenUrl);
+                
+                // Set up replacement select
+                const replacementSelect = document.getElementById('token-replacement');
+                replacementSelect.addEventListener('change', function() {
+                  if (this.value === 'fetch-replacements') {
+                    // Load replacements from the server
+                    fetch('json_replacements.php')
+                      .then(response => {
+                        if (!response.ok) {
+                          throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        if (data.success) {
+                          const replacements = data.replacements || {};
+                          const keys = Object.keys(replacements);
+                          
+                          // Reset select
+                          replacementSelect.innerHTML = '<option value="">-- 不应用替换规则 --</option>';
+                          
+                          // Add replacements as options
+                          keys.forEach(key => {
+                            replacementSelect.innerHTML += `<option value="${key}">${key}</option>`;
+                          });
+                          
+                          // Set to first rule if available
+                          if (keys.length > 0) {
+                            replacementSelect.value = keys[0];
+                          }
+                        } else {
+                          showNotification('加载替换规则失败', 'error');
+                          replacementSelect.value = '';
+                        }
+                      })
+                      .catch(error => {
+                        console.error('加载替换规则失败:', error);
+                        showNotification('加载替换规则失败', 'error');
+                        replacementSelect.value = '';
+                      });
+                  }
+                });
+              });
+          } else {
+            showNotification(data.message || '加载文件列表失败', 'error');
+            return Promise.reject('加载文件列表失败');
+          }
+        })
+        .catch(error => {
+          console.error('加载访问管理失败:', error);
+          showNotification('加载访问管理失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Generate access token
+    function generateToken() {
+      const expire = document.getElementById('token-expire').value;
+      const file = document.getElementById('token-file').value;
+      const replacement = document.getElementById('token-replacement').value;
+      
+      if (replacement === 'fetch-replacements') {
+        showNotification('请选择一个具体的替换规则', 'warning');
+        return;
+      }
+      
+      showLoading();
+      
+      // Generate a random token
+      const token = Array.from(Array(32), () => Math.floor(Math.random() * 36).toString(36)).join('');
+      
+      fetch('access_token.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token: token,
+          file: file,
+          replacement: replacement,
+          expiry: expire
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Show token result
+            document.getElementById('token-result').style.display = 'block';
+            
+            // Create URL
+            const baseUrl = window.location.href.split('index.html')[0];
+            const url = `${baseUrl}raw.php?file=${file}&token=${token}${replacement ? '&replace=' + replacement : ''}`;
+            document.getElementById('token-url').textContent = url;
+            
+            // Generate QR code
+            document.getElementById('qrcode').innerHTML = '';
+            var qr = qrcode(0, 'M');
+            qr.addData(url);
+            qr.make();
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(5);
+            
+            // Show success message
+            showNotification('访问令牌已成功生成');
+            
+            // Reload access section to show new token
+            loadAccess();
+          } else {
+            showNotification(data.message || '生成访问令牌失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('生成访问令牌失败:', error);
+          showNotification('生成访问令牌失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Copy token URL to clipboard
+    function copyTokenUrl() {
+      const tokenUrl = document.getElementById('token-url').textContent;
+      
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(tokenUrl)
+          .then(() => {
+            showNotification('访问链接已复制到剪贴板');
+          })
+          .catch(err => {
+            console.error('复制失败:', err);
+            showNotification('复制失败，请手动复制', 'error');
+          });
+      } else {
+        // Fallback for browsers that don't support clipboard API
+        const textArea = document.createElement('textarea');
+        textArea.value = tokenUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          showNotification('访问链接已复制到剪贴板');
+        } catch (err) {
+          console.error('复制失败:', err);
+          showNotification('复制失败，请手动复制', 'error');
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    }
+    
+    // Revoke token
+    function revokeToken(token) {
+      if (confirm('确定要撤销此访问令牌吗？此操作不可撤销。')) {
+        showLoading();
+        
+        fetch('access_token.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'revoke',
+            token: token
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification('访问令牌已成功撤销');
+              
+              // Reload current section
+              loadAccess();
+            } else {
+              showNotification(data.message || '撤销访问令牌失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('撤销访问令牌失败:', error);
+            showNotification('撤销访问令牌失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+    // Load logs section
+    function loadLogs() {
+      showLoading();
+      
+      // Set temporary content
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">访问日志</h2>
+          <div class="section-actions">
+            <button class="btn btn-danger" onclick="clearLogs()">
+              <i class="fas fa-trash"></i> 清空日志
+            </button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-body">
+            <div class="alert alert-info">正在加载访问日志...</div>
+          </div>
+        </div>
+      `;
+      
+      fetch('access_logs.php')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const logs = data.logs || [];
+            let logsHtml = '';
+            
+            if (logs.length > 0) {
+              logsHtml = `
+                <div class="table-responsive">
+                  <table class="table logs-table table-mobile-optimized">
+                    <thead>
+                      <tr>
+                        <th>时间</th>
+                        <th>IP地址</th>
+                        <th>用户代理</th>
+                        <th>访问令牌</th>
+                        <th>文件</th>
+                        <th>状态</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                logs.forEach(log => {
+                  const time = new Date(log.time * 1000).toLocaleString();
+                  const userAgent = log.userAgent || '';
+                  const token = log.token || '-';
+                  const status = log.status === 'failed' ? '失败' : '成功';
+                  const statusClass = log.status === 'failed' ? 'badge-error' : 'badge-success';
+                  
+                  logsHtml += `
+                    <tr>
+                      <td data-label="时间">${time}</td>
+                      <td data-label="IP地址">${log.ip || '-'}</td>
+                      <td data-label="用户代理">
+                        <div title="${userAgent}" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                          ${userAgent || '-'}
+                        </div>
+                      </td>
+                      <td data-label="访问令牌">
+                        <div class="token-display">${token}</div>
+                      </td>
+                      <td data-label="文件">${log.file || '-'}</td>
+                      <td data-label="状态">
+                        <span class="badge ${statusClass}">${status}</span>
+                      </td>
+                    </tr>
+                  `;
+                });
+                
+                logsHtml += `
+                    </tbody>
+                  </table>
+                </div>
+              `;
+            } else {
+              logsHtml = '<div class="alert alert-info">没有访问日志记录</div>';
+            }
+            
+            document.getElementById('content').innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">访问日志</h2>
+                <div class="section-actions">
+                  <button class="btn btn-danger" onclick="clearLogs()">
+                    <i class="fas fa-trash"></i> 清空日志
+                  </button>
+                </div>
+              </div>
+              
+              <div class="card logs-card">
+                <div class="card-body">
+                  ${logsHtml}
+                </div>
+              </div>
+            `;
+          } else {
+            showNotification(data.message || '加载访问日志失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('加载访问日志失败:', error);
+          showNotification('加载访问日志失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Clear logs
+    function clearLogs() {
+      if (confirm('确定要清空所有访问日志吗？此操作不可撤销。')) {
+        showLoading();
+        
+        fetch('access_logs.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'clear'
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              showNotification('访问日志已成功清空');
+              
+              // Reload current section
+              loadLogs();
+            } else {
+              showNotification(data.message || '清空访问日志失败', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('清空访问日志失败:', error);
+            showNotification('清空访问日志失败，请稍后重试', 'error');
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+    }
+    
+function loadSettings() {
+  showLoading();
+  
+  // Set temporary content
+  document.getElementById('content').innerHTML = `
+    <div class="section-header">
+      <h2 class="section-title">系统设置</h2>
+    </div>
+    
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-info">正在加载设置...</div>
+      </div>
+    </div>
+  `;
+  
+  fetch('settings.php')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const settings = data.settings || {};
+        
+        // Get system info
+        return fetch('debug.php?json=1')
+          .then(response => {
+            if (!response.ok) {
+              return { system: {} }; // Default if not available
+            }
+            return response.json();
+          })
+          .then(debugData => {
+            const system = debugData.system || {};
+            
+            document.getElementById('content').innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">系统设置</h2>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">基本设置</h3>
+                </div>
+                <div class="card-body">
+                  <form id="settings-form">
+                    <div class="form-group">
+                      <label for="settings-password">管理密码</label>
+                      <input type="password" id="settings-password" class="form-control" placeholder="输入新密码以更改">
+                      <small class="form-text">留空表示不修改当前密码</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="settings-default-expire">默认令牌有效期（秒）</label>
+                      <input type="number" id="settings-default-expire" class="form-control" value="${settings.defaultExpire || 86400}">
+                      <small class="form-text">设置为0表示永不过期</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="settings-history-count">保留历史版本数量</label>
+                      <input type="number" id="settings-history-count" class="form-control" value="${settings.historyCount || 10}">
+                      <small class="form-text">每个文件保留的最大历史版本数量</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="settings-log-days">日志保留天数</label>
+                      <input type="number" id="settings-log-days" class="form-control" value="${settings.logDays || 30}">
+                      <small class="form-text">访问日志保留的天数，超过此天数的日志将被自动删除</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="settings-theme">默认主题</label>
+                      <select id="settings-theme" class="form-control">
+                        <option value="light" ${settings.theme === 'light' ? 'selected' : ''}>浅色</option>
+                        <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>深色</option>
+                        <option value="auto" ${settings.theme === 'auto' ? 'selected' : ''}>跟随系统</option>
+                      </select>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="settings-editor-theme">编辑器主题</label>
+                      <select id="settings-editor-theme" class="form-control">
+                        <option value="default" ${settings.editorTheme === 'default' ? 'selected' : ''}>默认</option>
+                        <option value="material-darker" ${settings.editorTheme === 'material-darker' ? 'selected' : ''}>暗黑</option>
+                      </select>
+                    </div>
+                    
+                    <div class="form-group form-check">
+                      <input type="checkbox" id="settings-access-log" class="form-check-input" ${settings.accessLogEnabled !== false ? 'checked' : ''}>
+                      <label for="settings-access-log" class="form-check-label">启用访问日志</label>
+                    </div>
+                    
+                    <div class="form-group form-check">
+                      <input type="checkbox" id="settings-notifications" class="form-check-input" ${settings.notificationsEnabled !== false ? 'checked' : ''}>
+                      <label for="settings-notifications" class="form-check-label">启用通知</label>
+                    </div>
+                    
+                    <button type="button" id="save-settings-btn" class="btn btn-primary">保存设置</button>
+                    <button type="button" id="reset-settings-btn" class="btn btn-warning">重置设置</button>
+                  </form>
+                </div>
+              </div>
+              
+              <div class="card mt-4">
+                <div class="card-header">
+                  <h3 class="card-title">系统信息</h3>
+                </div>
+                <div class="card-body">
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">PHP 版本</div>
+                      <div class="info-value">${system.phpVersion || '未知'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">服务器</div>
+                      <div class="info-value">${system.server || '未知'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">数据目录</div>
+                      <div class="info-value">${system.dataDir || '未知'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">配置文件数量</div>
+                      <div class="info-value">${system.filesCount || '0'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">历史版本数量</div>
+                      <div class="info-value">${system.historyCount || '0'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">替换规则数量</div>
+                      <div class="info-value">${system.replacementsCount || '0'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">访问令牌数量</div>
+                      <div class="info-value">${system.tokensCount || '0'}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">日志记录数量</div>
+                      <div class="info-value">${system.logsCount || '0'}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card mt-4">
+                <div class="card-header">
+                  <h3 class="card-title">系统维护</h3>
+                </div>
+                <div class="card-body">
+                  <button type="button" id="init-system-btn" class="btn btn-info">初始化系统文件</button>
+                  <button type="button" id="check-system-btn" class="btn btn-secondary">检查系统状态</button>
+                </div>
+              </div>
+            `;
+            
+            // Add event listener for settings save
+            document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+            
+            // Add event listener for settings reset
+            document.getElementById('reset-settings-btn').addEventListener('click', function() {
+              if (confirm('确定要重置所有设置到默认值吗？此操作不可撤销。')) {
+                resetSettings();
+              }
+            });
+            
+            // Add event listener for system initialization
+            document.getElementById('init-system-btn').addEventListener('click', function() {
+              if (confirm('确定要初始化系统文件吗？这将创建所有必要的目录和文件。')) {
+                initializeSystem();
+              }
+            });
+            
+            // Add event listener for system check
+            document.getElementById('check-system-btn').addEventListener('click', function() {
+              window.open('debug.php', '_blank');
+            });
+          });
+      } else {
+        showNotification(data.message || '加载系统设置失败', 'error');
+        
+        // 显示简化的设置页面和初始化按钮
+        document.getElementById('content').innerHTML = `
+          <div class="section-header">
+            <h2 class="section-title">系统设置</h2>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">设置加载失败</h3>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-error">
+                <p>无法加载系统设置。可能是因为：</p>
+                <ul>
+                  <li>设置文件不存在或格式无效</li>
+                  <li>PHP无法写入设置文件</li>
+                  <li>服务器配置问题</li>
+                </ul>
+              </div>
+              <div class="mt-4">
+                <button id="init-system-btn" class="btn btn-primary">初始化系统</button>
+                <button id="check-system-btn" class="btn btn-secondary">检查系统状态</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Add event listener for system initialization
+        document.getElementById('init-system-btn').addEventListener('click', function() {
+          initializeSystem();
+        });
+        
+        // Add event listener for system check
+        document.getElementById('check-system-btn').addEventListener('click', function() {
+          window.open('debug.php', '_blank');
+        });
+      }
+    })
+    .catch(error => {
+      console.error('加载系统设置失败:', error);
+      showNotification('加载系统设置失败，请稍后重试', 'error');
+      
+      // 显示错误信息和恢复选项
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">系统设置</h2>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">设置加载失败</h3>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-error">
+              <p>无法加载系统设置。错误信息：</p>
+              <pre>${error.message || '未知错误'}</pre>
+            </div>
+            <div class="mt-4">
+              <button id="init-system-btn" class="btn btn-primary">初始化系统</button>
+              <button id="check-system-btn" class="btn btn-secondary">检查系统状态</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add event listener for system initialization
+      document.getElementById('init-system-btn').addEventListener('click', function() {
+        initializeSystem();
+      });
+      
+      // Add event listener for system check
+      document.getElementById('check-system-btn').addEventListener('click', function() {
+        window.open('debug.php', '_blank');
+      });
+    })
+    .finally(() => {
+      hideLoading();
+    });
+}
+
+// 初始化系统
+function initializeSystem() {
+  showLoading();
+  
+  fetch('debug.php?init_system=1&json=1')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showNotification('系统初始化成功', 'success');
+        // 重新加载设置
+        loadSettings();
+      } else {
+        showNotification(data.message || '系统初始化失败', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('系统初始化失败:', error);
+      showNotification('系统初始化失败: ' + error.message, 'error');
+    })
+    .finally(() => {
+      hideLoading();
+    });
+}
+
+// 重置设置到默认值
+function resetSettings() {
+  showLoading();
+  
+  fetch('settings.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      settings: {
+        reset: true
+      }
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showNotification('设置已重置为默认值', 'success');
+        // 重新加载设置
+        loadSettings();
+      } else {
+        showNotification(data.message || '重置设置失败', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('重置设置失败:', error);
+      showNotification('重置设置失败: ' + error.message, 'error');
+    })
+    .finally(() => {
+      hideLoading();
+    });
+}
+    
+    // Save settings
+    function saveSettings() {
+      const password = document.getElementById('settings-password').value;
+      const defaultExpire = document.getElementById('settings-default-expire').value;
+      const historyCount = document.getElementById('settings-history-count').value;
+      const logDays = document.getElementById('settings-log-days').value;
+      const theme = document.getElementById('settings-theme').value;
+      const editorTheme = document.getElementById('settings-editor-theme').value;
+      const accessLogEnabled = document.getElementById('settings-access-log').checked;
+      const notificationsEnabled = document.getElementById('settings-notifications').checked;
+      
+      showLoading();
+      
+      fetch('settings.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          settings: {
+            password: password,
+            defaultExpire: parseInt(defaultExpire),
+            historyCount: parseInt(historyCount),
+            logDays: parseInt(logDays),
+            theme: theme,
+            editorTheme: editorTheme,
+            accessLogEnabled: accessLogEnabled,
+            notificationsEnabled: notificationsEnabled
+          }
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showNotification('设置已成功保存');
+            
+            // Reset password field
+            document.getElementById('settings-password').value = '';
+            
+            // Apply theme if changed
+            if (theme !== localStorage.getItem('theme')) {
+              localStorage.setItem('theme', theme);
+              
+              if (theme === 'auto') {
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                  document.body.classList.add('dark-mode');
+                  document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                  document.body.classList.remove('dark-mode');
+                  document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+                }
+              } else if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+              } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-moon"></i>';
+              }
+            }
+            
+            // Apply editor theme if it was changed and editor exists
+            if (editor && editorTheme !== editor.getOption('theme')) {
+              editor.setOption('theme', editorTheme);
+            }
+            
+            if (replacementEditor && editorTheme !== replacementEditor.getOption('theme')) {
+              replacementEditor.setOption('theme', editorTheme);
+            }
+            
+            if (historyEditor && editorTheme !== historyEditor.getOption('theme')) {
+              historyEditor.setOption('theme', editorTheme);
+            }
+          } else {
+            showNotification(data.message || '保存设置失败', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('保存设置失败:', error);
+          showNotification('保存设置失败，请稍后重试', 'error');
+        })
+        .finally(() => {
+          hideLoading();
+        });
+    }
+    
+    // Load help section
+    function loadHelp() {
+      document.getElementById('content').innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">帮助与说明</h2>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">配置文件管理</h3>
+          </div>
+          <div class="card-body">
+            <p>通过此系统，您可以方便地管理 JSON 格式的配置文件。</p>
+            <h4>主要功能：</h4>
+            <ul>
+              <li><strong>文件管理</strong>：创建、编辑、删除配置文件。</li>
+              <li><strong>替换规则</strong>：为特定路径定义替换规则，用于动态修改配置文件内容。</li>
+              <li><strong>历史版本</strong>：查看和恢复历史版本。</li>
+              <li><strong>访问管理</strong>：生成和管理访问令牌，控制外部访问权限。</li>
+              <li><strong>访问日志</strong>：记录和查看访问日志。</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3 class="card-title">访问 API</h3>
+          </div>
+          <div class="card-body">
+            <p>您可以通过 API 接口访问配置文件，格式如下：</p>
+            <pre>GET /raw.php?file=文件名&token=访问令牌</pre>
+            
+            <h4>参数说明：</h4>
+            <ul>
+              <li><strong>file</strong>：要访问的配置文件名，必须包含 .json 后缀。</li>
+              <li><strong>token</strong>：访问令牌，在访问管理页面生成。如果设置了公开访问，可以省略。</li>
+              <li><strong>replace</strong>：可选参数，指定要应用的替换规则。可以提供多个替换规则，使用逗号分隔。</li>
+            </ul>
+            
+            <h4>响应格式：</h4>
+            <p>API 将返回 JSON 格式的响应：</p>
+            <ul>
+              <li>如果访问成功，将直接返回配置文件的内容。</li>
+              <li>如果访问失败，将返回错误信息：<code>{"error": "错误信息"}</code></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3 class="card-title">替换规则说明</h3>
+          </div>
+          <div class="card-body">
+            <p>替换规则允许您定义 JSON 路径和替换内容，当外部请求访问配置文件时，系统会根据替换规则动态修改配置文件的内容。</p>
+            
+            <h4>JSON 路径格式：</h4>
+            <p>使用点号分隔的路径，例如：</p>
+            <ul>
+              <li><code>server.host</code> - 表示 <code>{"server": {"host": "原值"}}</code> 中的 host 值</li>
+              <li><code>users.0.name</code> - 表示 <code>{"users": [{"name": "原值"}, ...]}</code> 中的第一个用户的名称</li>
+              <li><code>settings.timeout</code> - 表示 <code>{"settings": {"timeout": 原值}}</code> 中的超时设置</li>
+            </ul>
+            
+            <h4>替换内容：</h4>
+            <p>替换内容可以是任何有效的 JSON 值，包括：</p>
+            <ul>
+              <li>字符串: <code>"新的字符串值"</code></li>
+              <li>数字: <code>42</code></li>
+              <li>布尔值: <code>true</code> 或 <code>false</code></li>
+              <li>数组: <code>["项目1", "项目2"]</code></li>
+              <li>对象: <code>{"键": "值"}</code></li>
+              <li>null: <code>null</code></li>
+            </ul>
+            
+            <h4>多规则应用：</h4>
+            <p>您可以在一个请求中应用多个替换规则，使用逗号分隔规则名称：</p>
+            <pre>GET /raw.php?file=config.json&token=xxx&replace=rule1,rule2,rule3</pre>
+            <p>系统将按照指定的顺序依次应用替换规则。</p>
+          </div>
+        </div>
+        
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3 class="card-title">实用技巧</h3>
+          </div>
+          <div class="card-body">
+            <h4>访问令牌使用建议：</h4>
+            <ul>
+              <li>对于公开内容，可以不使用访问令牌。</li>
+              <li>对于敏感配置，建议设置较短的令牌有效期。</li>
+              <li>对于特定应用，可以限制令牌只能访问特定的文件。</li>
+            </ul>
+            
+            <h4>JSON 编辑器：</h4>
+            <ul>
+              <li>使用 <kbd>Ctrl</kbd> + <kbd>Space</kbd> 可以触发代码自动完成功能。</li>
+              <li>编辑器会自动验证 JSON 格式，无效的 JSON 将显示错误提示。</li>
+              <li>可以使用 <kbd>Tab</kbd> 键进行缩进。</li>
+            </ul>
+            
+            <h4>移动设备使用：</h4>
+            <ul>
+              <li>在小屏幕设备上，可以点击左上角的菜单按钮来显示或隐藏侧边导航栏。</li>
+              <li>编辑较大的配置文件时，建议使用横屏模式以获得更好的体验。</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
